@@ -1,11 +1,21 @@
 #ifndef AST_EVALUATOR_HH
 #define AST_EVALUATOR_HH
 
+#include <stack>
+
 #include "nodes.hh"
+#include "../parser/stack.hh"
 
 namespace ast {
 
 class ASTEvaluator : public ConstASTVisitor {
+
+    int value = 0;
+    std::stack<int> values;
+
+    void output(int final_value) {
+        std::cout << final_value << std::endl;
+    }
 
 public:
     ASTEvaluator() {};
