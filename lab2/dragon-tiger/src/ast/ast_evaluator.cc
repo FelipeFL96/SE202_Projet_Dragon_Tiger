@@ -78,7 +78,7 @@ void ASTEvaluator::visit(const Sequence &seqExpr) {
     const auto exprs = seqExpr.get_exprs();
 
     if (exprs.empty())
-        utils::error("fatal: invalid empty sequence");
+        utils::error("ast_evaluator: invalid empty sequence");
 
     expr_level++;
 
@@ -101,11 +101,11 @@ void ASTEvaluator::visit(const Sequence &seqExpr) {
 }
 
 void ASTEvaluator::visit(const Let &let) {
-    printf("NODE OF TYPE Let\n");
+    utils::error("ast_evaluator: invalid node type for evaluation (let)");
 }
 
 void ASTEvaluator::visit(const Identifier &id) {
-    printf("NODE OF TYPE Identifier\n");
+    utils::error("ast_evaluator: invalid node type for evaluation (identifier)");
 }
 
 void ASTEvaluator::visit(const IfThenElse &ite) {
@@ -139,31 +139,31 @@ void ASTEvaluator::visit(const IfThenElse &ite) {
 }
 
 void ASTEvaluator::visit(const VarDecl &decl) {
-    printf("NODE OF TYPE VarDecl\n");
+    utils::error("ast_evaluator: invalid node type for evaluation (variable declaration)");
 }
 
 void ASTEvaluator::visit(const FunDecl &decl) {
-    printf("NODE OF TYPE FunDecl\n");
+    utils::error("ast_evaluator: invalid node type for evaluation (function declaration)");
 }
 
 void ASTEvaluator::visit(const FunCall &call) {
-    printf("NODE OF TYPE FunCall\n");
+    utils::error("ast_evaluator: invalid node type for evaluation (function call)");
 }
 
 void ASTEvaluator::visit(const WhileLoop &loop) {
-    printf("NODE OF TYPE WhileLoop\n");
+    utils::error("ast_evaluator: invalid node type for evaluation (while loop)");
 }
 
 void ASTEvaluator::visit(const ForLoop &loop) {
-    printf("NODE OF TYPE ForLoop\n");
+    utils::error("ast_evaluator: invalid node type for evaluation (for loop)");
 }
 
 void ASTEvaluator::visit(const Break &brk) {
-    printf("NODE OF TYPE Break\n");
+    utils::error("ast_evaluator: invalid node type for evaluation (break)");
 }
 
 void ASTEvaluator::visit(const Assign &assign) {
-    printf("NODE OF TYPE Assign\n");
+    utils::error("ast_evaluator: invalid node type for evaluation (assignment)");
 }
 
 

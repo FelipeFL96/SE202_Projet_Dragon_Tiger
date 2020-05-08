@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
   }
 
   if (vm.count("eval")) {
-    ast::ASTEvaluator evaluator;
+    ast::ASTEvaluator evaluator(&std::cout);
     parser_driver.result_ast->accept(evaluator);
   }
 
