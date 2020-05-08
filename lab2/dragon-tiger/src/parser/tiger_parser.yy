@@ -111,8 +111,8 @@ using utils::nl;
 %left AND;
 %nonassoc EQ NEQ LT LE GT GE;
 %left PLUS MINUS;
-%left UMINUS;
 %left TIMES DIVIDE;
+%left UMINUS;
 
 // Declare grammar rules and production actions
 
