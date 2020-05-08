@@ -4,11 +4,11 @@
 namespace ast {
 
 void ASTEvaluator::visit(const IntegerLiteral &literal) {
-    if (value == 0){
-        output(literal.value);
+    if (expr_level == 0){
+        *ostream << literal.value;
     }
     else {
-        values.push(literal.value);
+        expr_values.push(literal.value);
     }
 }
 
@@ -19,15 +19,15 @@ void ASTEvaluator::visit(const StringLiteral &literal) {
 void ASTEvaluator::visit(const BinaryOperator &binop) {
     int val_expr_left, val_expr_right, val;
 
-    value++;
+    expr_level++;
 
     binop.get_left().accept(*this);
-    val_expr_left = values.top();
-    values.pop();
+    val_expr_left = expr_values.top();
+    expr_values.pop();
 
     binop.get_right().accept(*this);
-    val_expr_right = values.top();
-    values.pop();
+    val_expr_right = expr_values.top();
+    expr_values.pop();
 
     switch (binop.op) {
         case Operator::o_plus:
@@ -62,13 +62,13 @@ void ASTEvaluator::visit(const BinaryOperator &binop) {
             break;
     }
 
-    value--;
+    expr_level--;
 
-    if (value == 0) {
-        output(val);
+    if (expr_level == 0) {
+        *ostream << val;
     }
     else {
-        values.push(val);
+        expr_values.push(val);
     }
 }
 
@@ -80,23 +80,23 @@ void ASTEvaluator::visit(const Sequence &seqExpr) {
     if (exprs.empty())
         utils::error("fatal: invalid empty sequence");
 
-    value++;
+    expr_level++;
 
     for (auto expr = exprs.cbegin(); expr != exprs.cend(); expr++) {
         (*expr)->accept(*this);
-        if (!values.empty()) {
-            val = values.top();
-            values.pop();
+        if (!expr_values.empty()) {
+            val = expr_values.top();
+            expr_values.pop();
         }
     }
 
-    value--;
+    expr_level--;
 
-    if (value == 0) {
-        output(val);
+    if (expr_level == 0) {
+        *ostream << val;
     }
     else {
-        values.push(val);
+        expr_values.push(val);
     }
 }
 
@@ -111,30 +111,30 @@ void ASTEvaluator::visit(const Identifier &id) {
 void ASTEvaluator::visit(const IfThenElse &ite) {
     int val_expr_cond, val;
 
-    value++;
+    expr_level++;
 
     ite.get_condition().accept(*this);
-    val_expr_cond = values.top();
-    values.pop();
+    val_expr_cond = expr_values.top();
+    expr_values.pop();
 
     if (val_expr_cond) {
         ite.get_then_part().accept(*this);
-        val = values.top();
-        values.pop();
+        val = expr_values.top();
+        expr_values.pop();
     }
     else {
         ite.get_else_part().accept(*this);
-        val = values.top();
-        values.pop();
+        val = expr_values.top();
+        expr_values.pop();
     }
 
-    value--;
+    expr_level--;
 
-    if (value == 0) {
-        output(val);
+    if (expr_level == 0) {
+        *ostream << val;
     }
     else {
-        values.push(val);
+        expr_values.push(val);
     }
 }
 

@@ -10,15 +10,13 @@ namespace ast {
 
 class ASTEvaluator : public ConstASTVisitor {
 
-    int value = 0;
-    std::stack<int> values;
-
-    void output(int final_value) {
-        std::cout << final_value << std::endl;
-    }
+    std::ostream *ostream;
+    std::stack<int> expr_values;
+    int expr_level = 0;
 
 public:
-    ASTEvaluator() {};
+    ASTEvaluator(std::ostream *_ostream) : ostream(_ostream) {}
+    ~ASTEvaluator() { *ostream << std::endl; }
     
     virtual void visit(const IntegerLiteral &);
     virtual void visit(const StringLiteral &);
