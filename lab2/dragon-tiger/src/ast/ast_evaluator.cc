@@ -40,6 +40,8 @@ void ASTEvaluator::visit(const BinaryOperator &binop) {
             val = val_expr_left * val_expr_right;
             break;
         case Operator::o_divide:
+            if (val_expr_right == 0)
+                utils::error("evaluator: attempt to divide by zero");
             val = val_expr_left / val_expr_right;
             break;
         case Operator::o_eq:
