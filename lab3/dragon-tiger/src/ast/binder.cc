@@ -125,43 +125,74 @@ void Binder::visit(StringLiteral &literal) {
 }
 
 void Binder::visit(BinaryOperator &op) {
+  op.get_left().accept(*this);
+  op.get_right().accept(*this);
 }
 
 void Binder::visit(Sequence &seq) {
+  for (auto expr : seq.get_exprs()) {
+    expr->accept(*this);
+  }
+
 }
 
 void Binder::visit(Let &let) {
+  for (auto decl : let.get_decls()) {
+    decl->accept(*this);
+  }
+  let.get_sequence().accept(*this);
 }
 
 void Binder::visit(Identifier &id) {
+  if (!id.get_decl()) {
+    id.set_decl(&dynamic_cast<VarDecl&>(find(id.loc, id.name)));
+  }
 }
 
 void Binder::visit(IfThenElse &ite) {
+  ite.get_condition().accept(*this);
+  ite.get_then_part().accept(*this);
+  ite.get_else_part().accept(*this);
 }
 
 void Binder::visit(VarDecl &decl) {
+  enter(decl);
 }
 
 void Binder::visit(FunDecl &decl) {
   set_parent_and_external_name(decl);
   functions.push_back(&decl);
   /* ... put your code here ... */
+  for (auto param : decl.get_params()) {
+    param->accept(*this);
+  }
+  decl.get_expr()->accept(*this);
   functions.pop_back();
 }
 
 void Binder::visit(FunCall &call) {
+  for (auto arg : call.get_args()) {
+    arg->accept(*this);
+  }
 }
 
 void Binder::visit(WhileLoop &loop) {
+  loop.get_condition().accept(*this);
+  loop.get_body().accept(*this);
 }
 
 void Binder::visit(ForLoop &loop) {
+  loop.get_variable().accept(*this);
+  loop.get_high().accept(*this);
+  loop.get_body().accept(*this);
 }
 
 void Binder::visit(Break &b) {
 }
 
 void Binder::visit(Assign &assign) {
+  assign.get_lhs().accept(*this);
+  assign.get_rhs().accept(*this);
 }
 
 } // namespace binder
