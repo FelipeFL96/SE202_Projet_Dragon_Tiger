@@ -137,10 +137,12 @@ void Binder::visit(Sequence &seq) {
 }
 
 void Binder::visit(Let &let) {
+  push_scope();
   for (auto decl : let.get_decls()) {
     decl->accept(*this);
   }
   let.get_sequence().accept(*this);
+  pop_scope();
 }
 
 void Binder::visit(Identifier &id) {
@@ -163,14 +165,17 @@ void Binder::visit(FunDecl &decl) {
   set_parent_and_external_name(decl);
   functions.push_back(&decl);
   /* ... put your code here ... */
+  push_scope();
   for (auto param : decl.get_params()) {
     param->accept(*this);
   }
   decl.get_expr()->accept(*this);
+  pop_scope();
   functions.pop_back();
 }
 
 void Binder::visit(FunCall &call) {
+
   for (auto arg : call.get_args()) {
     arg->accept(*this);
   }
@@ -182,9 +187,11 @@ void Binder::visit(WhileLoop &loop) {
 }
 
 void Binder::visit(ForLoop &loop) {
+  push_scope();
   loop.get_variable().accept(*this);
   loop.get_high().accept(*this);
   loop.get_body().accept(*this);
+  pop_scope();
 }
 
 void Binder::visit(Break &b) {
