@@ -161,7 +161,7 @@ void Binder::visit(IfThenElse &ite) {
 }
 
 void Binder::visit(VarDecl &decl) {
-  decl.get_expr()->accept(*this);
+  //decl.get_expr()->accept(*this);
   enter(decl);
   decl.set_depth(functions.size() - 1);
 }
@@ -223,7 +223,6 @@ void Binder::visit(Break &b) {
 
 void Binder::visit(Assign &assign) {
   assign.get_lhs().accept(*this);
-  //assign.get_lhs().get_decl() == loop_indexes.at(0);
   if(assign.get_lhs().get_decl()) {
     for (auto index : loop_indexes) {
       if (index == &assign.get_lhs().get_decl().get())
