@@ -223,9 +223,12 @@ void Binder::visit(Break &b) {
 
 void Binder::visit(Assign &assign) {
   assign.get_lhs().accept(*this);
-  for (auto index : loop_indexes) {
-    if (index->name == assign.get_lhs().get_decl()->name)
-      error(assign.get_lhs().loc, "loop index is not assignable");
+  //assign.get_lhs().get_decl() == loop_indexes.at(0);
+  if(assign.get_lhs().get_decl()) {
+    for (auto index : loop_indexes) {
+      if (index == &assign.get_lhs().get_decl().get())
+        error(assign.get_lhs().loc, "loop index is not assignable");
+    }
   }
   assign.get_rhs().accept(*this);
 }
