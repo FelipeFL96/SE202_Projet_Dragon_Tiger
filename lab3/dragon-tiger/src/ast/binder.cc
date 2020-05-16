@@ -191,20 +191,20 @@ void Binder::visit(FunCall &call) {
 }
 
 void Binder::visit(WhileLoop &loop) {
-  loops.push_back(&loop);
   loop.get_condition().accept(*this);
+  loops.push_back(&loop);
   loop.get_body().accept(*this);
   loops.pop_back();
 }
 
 void Binder::visit(ForLoop &loop) {
-  loops.push_back(&loop);
   push_scope();
   loop.get_variable().accept(*this);
   loop.get_high().accept(*this);
+  loops.push_back(&loop);
   loop.get_body().accept(*this);
-  pop_scope();
   loops.pop_back();
+  pop_scope();
 }
 
 void Binder::visit(Break &b) {
