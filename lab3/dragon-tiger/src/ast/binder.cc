@@ -148,6 +148,10 @@ void Binder::visit(Let &let) {
 void Binder::visit(Identifier &id) {
   if (!id.get_decl()) {
     id.set_decl(&dynamic_cast<VarDecl&>(find(id.loc, id.name)));
+    id.set_depth(functions.size() - 1);
+    if (id.get_depth() != id.get_decl()->get_depth()) {
+      id.get_decl()->set_escapes();
+    }
   }
 }
 
@@ -159,23 +163,30 @@ void Binder::visit(IfThenElse &ite) {
 
 void Binder::visit(VarDecl &decl) {
   enter(decl);
+  decl.set_depth(functions.size() - 1);
 }
 
 void Binder::visit(FunDecl &decl) {
   set_parent_and_external_name(decl);
   functions.push_back(&decl);
+  std::cout << "FUNCTION STACK HEIGHT: " << functions.size() << std::endl;
   /* ... put your code here ... */
+  enter(decl);
+  decl.set_depth(functions.size() - 1);
+
   push_scope();
   for (auto param : decl.get_params()) {
     param->accept(*this);
   }
   decl.get_expr()->accept(*this);
   pop_scope();
+
   functions.pop_back();
 }
 
 void Binder::visit(FunCall &call) {
-
+  call.set_decl(&dynamic_cast<FunDecl&>(find(call.loc, call.func_name)));
+  call.set_depth(functions.size() - 1);
   for (auto arg : call.get_args()) {
     arg->accept(*this);
   }
