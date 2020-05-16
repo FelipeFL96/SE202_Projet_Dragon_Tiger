@@ -133,7 +133,6 @@ void Binder::visit(Sequence &seq) {
   for (auto expr : seq.get_exprs()) {
     expr->accept(*this);
   }
-
 }
 
 void Binder::visit(Let &let) {
@@ -169,7 +168,6 @@ void Binder::visit(VarDecl &decl) {
 void Binder::visit(FunDecl &decl) {
   set_parent_and_external_name(decl);
   functions.push_back(&decl);
-  std::cout << "FUNCTION STACK HEIGHT: " << functions.size() << std::endl;
   /* ... put your code here ... */
   enter(decl);
   decl.set_depth(functions.size() - 1);
@@ -193,19 +191,29 @@ void Binder::visit(FunCall &call) {
 }
 
 void Binder::visit(WhileLoop &loop) {
+  loops.push_back(&loop);
   loop.get_condition().accept(*this);
   loop.get_body().accept(*this);
+  loops.pop_back();
 }
 
 void Binder::visit(ForLoop &loop) {
+  loops.push_back(&loop);
   push_scope();
   loop.get_variable().accept(*this);
   loop.get_high().accept(*this);
   loop.get_body().accept(*this);
   pop_scope();
+  loops.pop_back();
 }
 
 void Binder::visit(Break &b) {
+  if (loops.size() >= 1) {
+    b.set_loop(loops.back());
+  }
+  else {
+    utils::error(b.loc, "break outside loop");
+  }
 }
 
 void Binder::visit(Assign &assign) {
