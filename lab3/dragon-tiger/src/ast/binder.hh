@@ -15,6 +15,7 @@ class Binder : public ASTVisitor {
   std::vector<scope_t> scopes;
   std::vector<FunDecl *> functions;
   std::vector<Loop *> loops;
+  std::vector<VarDecl *> loop_indexes;
   std::unordered_set<Symbol> external_names;
   void push_scope();
   void pop_scope();

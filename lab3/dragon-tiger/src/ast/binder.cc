@@ -201,9 +201,13 @@ void Binder::visit(ForLoop &loop) {
   push_scope();
   loop.get_variable().accept(*this);
   loop.get_high().accept(*this);
+
   loops.push_back(&loop);
+  loop_indexes.push_back(&loop.get_variable());
   loop.get_body().accept(*this);
+  loop_indexes.pop_back();
   loops.pop_back();
+
   pop_scope();
 }
 
@@ -218,6 +222,10 @@ void Binder::visit(Break &b) {
 
 void Binder::visit(Assign &assign) {
   assign.get_lhs().accept(*this);
+  for (auto index : loop_indexes) {
+    if (index->name == assign.get_lhs().get_decl()->name)
+      error(assign.get_lhs().loc, "loop index is not assignable");
+  }
   assign.get_rhs().accept(*this);
 }
 
