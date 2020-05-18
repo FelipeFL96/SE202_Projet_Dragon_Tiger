@@ -187,7 +187,7 @@ void Binder::visit(IfThenElse &ite) {
 void Binder::visit(VarDecl &decl) {
   enter(decl);
   decl.set_depth(functions.size() - 1);
-  decl.get_expr()->accept(*this);
+  //decl.get_expr()->accept(*this);
 }
 
 void Binder::visit(FunDecl &decl) {
