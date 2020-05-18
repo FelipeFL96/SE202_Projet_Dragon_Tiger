@@ -137,10 +137,34 @@ void Binder::visit(Sequence &seq) {
 
 void Binder::visit(Let &let) {
   push_scope();
+
+  // Analysing declarations in Let
   for (auto decl : let.get_decls()) {
-    decl->accept(*this);
+    if (dynamic_cast<FunDecl *>(decl)) { // Making consecutive function declarations visible in the scope
+      enter(*decl);
+      consecutive_functions.push_back(&dynamic_cast<FunDecl&>(*decl));
+    }
+    else {
+      // Analysing consecutive function declaration blocks
+      if (!consecutive_functions.empty()) {
+        for (auto fun_decl : consecutive_functions)
+          fun_decl->accept(*this);
+        consecutive_functions.clear();
+      }
+
+      decl->accept(*this);
+    }
   }
+  // Analysing possible lasting consecutive function declaration block
+  if (!consecutive_functions.empty()) {
+    for (auto fun_decl : consecutive_functions)
+      fun_decl->accept(*this);
+    consecutive_functions.clear();
+  }
+
+  // Analysing expressions in Let
   let.get_sequence().accept(*this);
+
   pop_scope();
 }
 
@@ -170,7 +194,6 @@ void Binder::visit(FunDecl &decl) {
   set_parent_and_external_name(decl);
   functions.push_back(&decl);
   /* ... put your code here ... */
-  enter(decl);
   decl.set_depth(functions.size() - 1);
 
   push_scope();
