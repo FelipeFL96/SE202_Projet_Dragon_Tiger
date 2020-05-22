@@ -185,8 +185,10 @@ void Binder::visit(IfThenElse &ite) {
 }
 
 void Binder::visit(VarDecl &decl) {
+  variable_declaration = true;
   if (decl.get_expr())
     decl.get_expr()->accept(*this);
+  variable_declaration = false;
   enter(decl);
   decl.set_depth(functions.size() - 1);
 }
@@ -237,6 +239,9 @@ void Binder::visit(ForLoop &loop) {
 }
 
 void Binder::visit(Break &b) {
+  if (variable_declaration) {
+    utils::error(b.loc, "breaks are not allowed in variable declarations");
+  }
   if (loops.size() >= 1) {
     b.set_loop(loops.back());
   }
