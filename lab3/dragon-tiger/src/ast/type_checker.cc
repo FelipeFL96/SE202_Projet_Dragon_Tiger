@@ -95,6 +95,12 @@ void TypeChecker::visit(Break &b) {
 }
 
 void TypeChecker::visit(Assign &assign) {
+    assign.get_lhs().accept(*this);
+    assign.get_rhs().accept(*this);
+    if ( assign.get_lhs().get_type() != assign.get_rhs().get_type()) {
+        utils::error(assign.loc, "assigned value and variable must be of the same type");
+    }
+    assign.set_type(t_void);
 }
 
 }
