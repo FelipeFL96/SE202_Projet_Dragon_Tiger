@@ -44,6 +44,15 @@ void TypeChecker::visit(Identifier &id) {
 }
 
 void TypeChecker::visit(IfThenElse &ite) {
+    ite.get_condition().accept(*this);
+    ite.get_then_part().accept(*this);
+    ite.get_else_part().accept(*this);
+    if (ite.get_then_part().get_type() ==  ite.get_else_part().get_type()) {
+        ite.set_type(ite.get_then_part().get_type());
+    }
+    else {
+        utils::error("different return types for 'then' and 'else'");
+    }
 }
 
 void TypeChecker::visit(VarDecl &decl) {
@@ -56,9 +65,28 @@ void TypeChecker::visit(FunCall &call) {
 }
 
 void TypeChecker::visit(WhileLoop &loop) {
+    loop.get_condition().accept(*this);
+    loop.get_body().accept(*this);
+    if (loop.get_condition().get_type() != t_int) {
+        utils::error(loop.loc, "loop condition must be an 'int' type expression");
+    }
+    if (loop.get_body().get_type() != t_void) {
+        utils::error(loop.loc, "loop body must be of type void");
+    }
+    loop.set_type(t_void);
 }
 
 void TypeChecker::visit(ForLoop &loop) {
+    loop.get_variable().accept(*this);
+    loop.get_high().accept(*this);
+    loop.get_body().accept(*this);
+    if ((loop.get_variable().get_type() != t_int) || (loop.get_high().get_type() != t_int)) {
+        utils::error(loop.loc, "loop bounds must be of type 'int'");
+    }
+    if (loop.get_body().get_type() != t_void) {
+        utils::error(loop.loc, "loop body must be of type void");
+    }
+    loop.set_type(t_void);
 }
 
 
