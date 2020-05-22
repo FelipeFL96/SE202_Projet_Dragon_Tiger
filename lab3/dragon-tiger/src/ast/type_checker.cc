@@ -56,9 +56,29 @@ void TypeChecker::visit(IfThenElse &ite) {
 }
 
 void TypeChecker::visit(VarDecl &decl) {
+    if (decl.get_expr())
+        decl.get_expr()->accept(*this);
+    if (decl.type_name) {
+        Symbol type = decl.type_name.get();
+        if (!decl.get_expr())
+            type == Symbol("int") ? decl.set_type(t_int) : decl.set_type(t_string);
+        else if ((type == Symbol("int")) && (decl.get_expr()->get_type() == t_int))
+            decl.set_type(t_int);
+        else if((type == Symbol("string")) && (decl.get_expr()->get_type() == t_string))
+            decl.set_type(t_string);
+        else
+            utils::error(decl.loc, "declared type '" + decl.type_name.get().get()
+                + "' doesn't match with expression type");
+    }
+    else {
+        decl.set_type(decl.get_expr()->get_type());
+    }
 }
 
 void TypeChecker::visit(FunDecl &decl) {
+    for (auto param : decl.get_params())
+        param->accept(*this);
+    decl.get_expr()->accept(*this);
 }
 
 void TypeChecker::visit(FunCall &call) {
