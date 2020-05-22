@@ -82,6 +82,21 @@ void TypeChecker::visit(FunDecl &decl) {
 }
 
 void TypeChecker::visit(FunCall &call) {
+    FunDecl &decl = call.get_decl().get();
+
+    if (call.get_args().size() != decl.get_params().size()) {
+        utils::error(call.loc, "function call lacking parameters");
+    }
+    for (auto arg : call.get_args())
+        arg->accept(*this);
+    for (int i = 0; i < decl.get_params().size(); i++) {
+        if (call.get_args().at(i)->get_type() != decl.get_params().at(i)->get_type()) {
+            VarDecl *param = decl.get_params().at(i);
+            Expr *arg = call.get_args().at(i);
+            utils::error(arg->loc, "argument type differs from expected '" + param->name.get() + "' parameter type");
+        }
+    }
+    call.set_type(decl.get_type());
 }
 
 void TypeChecker::visit(WhileLoop &loop) {
