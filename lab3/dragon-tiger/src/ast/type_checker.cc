@@ -19,6 +19,21 @@ void TypeChecker::visit(StringLiteral &literal) {
 }
 
 void TypeChecker::visit(BinaryOperator &op) {
+    op.get_left().accept(*this);
+    op.get_right().accept(*this);
+
+    if (op.get_left().get_type() != op.get_right().get_type()) {
+        utils::error(op.loc, "invalid operation! operands must be of the same type");
+    }
+    else if (
+        ((op.op == o_plus) || (op.op == o_minus) || (op.op == o_times) || (op.op == o_divide))
+        && (op.get_left().get_type() == t_string)
+    ) {
+        utils::error(op.loc, "cannot execute arithmetic operation on a type other than 'int'");
+    }
+    else {
+        op.set_type(op.get_left().get_type());
+    }
 }
 
 void TypeChecker::visit(Sequence &seq) {
