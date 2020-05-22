@@ -104,6 +104,14 @@ void Binder::set_parent_and_external_name(FunDecl &decl) {
   decl.set_external_name(external_name);
 }
 
+/* Verifies if a given variable declaration corresponds to a for-loop index */
+bool Binder::is_loop_index(VarDecl *var) {
+  for (auto index : loop_indexes)
+    if (var == index)
+      return true;
+  return false;
+}
+
 /* Binds a whole program. This method wraps the program inside a top-level main
  * function.  Then, it visits the programs with the Binder visitor; binding
  * each identifier to its declaration and computing depths.*/
@@ -117,6 +125,7 @@ FunDecl *Binder::analyze_program(Expr &root) {
   main->accept(*this);
   return main;
 }
+
 
 void Binder::visit(IntegerLiteral &literal) {
 }
@@ -185,7 +194,8 @@ void Binder::visit(IfThenElse &ite) {
 }
 
 void Binder::visit(VarDecl &decl) {
-  variable_declaration = true;
+  if (!is_loop_index(&decl))
+    variable_declaration = true;
   if (decl.get_expr())
     decl.get_expr()->accept(*this);
   variable_declaration = false;
@@ -226,14 +236,14 @@ void Binder::visit(WhileLoop &loop) {
 
 void Binder::visit(ForLoop &loop) {
   push_scope();
+  loop_indexes.push_back(&loop.get_variable());
   loop.get_variable().accept(*this);
   loop.get_high().accept(*this);
 
   loops.push_back(&loop);
-  loop_indexes.push_back(&loop.get_variable());
   loop.get_body().accept(*this);
-  loop_indexes.pop_back();
   loops.pop_back();
+  loop_indexes.pop_back();
 
   pop_scope();
 }
@@ -253,10 +263,8 @@ void Binder::visit(Break &b) {
 void Binder::visit(Assign &assign) {
   assign.get_lhs().accept(*this);
   if(assign.get_lhs().get_decl()) {
-    for (auto index : loop_indexes) {
-      if (index == &assign.get_lhs().get_decl().get())
+    if (is_loop_index(&assign.get_lhs().get_decl().get()))
         error(assign.get_lhs().loc, "loop index is not assignable");
-    }
   }
   assign.get_rhs().accept(*this);
 }
