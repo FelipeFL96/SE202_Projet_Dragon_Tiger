@@ -146,6 +146,7 @@ void Binder::visit(Sequence &seq) {
 
 void Binder::visit(Let &let) {
   push_scope();
+  std::vector<FunDecl *> consecutive_functions;
 
   // Analysing declarations in Let
   for (auto decl : let.get_decls()) {
