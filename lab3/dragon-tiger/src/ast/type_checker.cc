@@ -22,9 +22,21 @@ void TypeChecker::visit(BinaryOperator &op) {
 }
 
 void TypeChecker::visit(Sequence &seq) {
+    for (auto expr : seq.get_exprs())
+        expr->accept(*this);
+    if (seq.get_exprs().empty()) {
+        seq.set_type(t_void);
+    }
+    else {
+        seq.set_type(seq.get_exprs().back()->get_type());
+    }
 }
 
 void TypeChecker::visit(Let &let) {
+    for (auto decl : let.get_decls())
+        decl->accept(*this);
+    let.get_sequence().accept(*this);
+    let.set_type(let.get_sequence().get_type());
 }
 
 void TypeChecker::visit(Identifier &id) {
