@@ -179,7 +179,12 @@ void Binder::visit(Let &let) {
 
 void Binder::visit(Identifier &id) {
   if (!id.get_decl()) {
-    id.set_decl(&dynamic_cast<VarDecl&>(find(id.loc, id.name)));
+    try {
+      id.set_decl(&dynamic_cast<VarDecl&>(find(id.loc, id.name)));
+    }
+    catch (std::bad_cast) {
+      utils::error(id.loc, "invalid reference to function in expression");
+    }
     id.set_depth(functions.size() - 1);
     if (id.get_depth() != id.get_decl()->get_depth()) {
       id.get_decl()->set_escapes();
