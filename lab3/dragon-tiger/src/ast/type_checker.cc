@@ -104,46 +104,30 @@ void TypeChecker::visit(FunDecl &decl) {
     if (decl.get_type() != t_undef)
         return;
 
+    // Parameter evaluation
     for (auto param : decl.get_params())
         param->accept(*this);
 
-    // Primitive functions
+    // Type determination
+    if (decl.type_name) {
+        if (decl.type_name == Symbol("int"))
+            decl.set_type(t_int);
+        else if (decl.type_name == Symbol("string"))
+            decl.set_type(t_string);
+    }
+    else {
+        decl.set_type(t_void);
+    }
+
+    // Primitive Functions
     if (!decl.get_expr()) {
-        if (decl.type_name) {
-            if ((decl.type_name == Symbol("int"))) {
-                decl.set_type(t_int);
-            }
-            else if ((decl.type_name == Symbol("string"))) {
-                decl.set_type(t_string);
-            }
-        }
-        else {
-            decl.set_type(t_void);
-        }
         return;
     }
 
     decl.get_expr()->accept(*this);
 
-    if (decl.type_name) {
-        if ((decl.type_name == Symbol("int")) && decl.get_expr()->get_type() == t_int) {
-            decl.set_type(t_int);
-        }
-        else if ((decl.type_name == Symbol("string")) && (decl.get_expr()->get_type() == t_string)) {
-            decl.set_type(t_string);
-        }
-        else {
-            utils::error(decl.loc, "function's expression type different to function's type");
-        }
-    }
-    else {
-        if (decl.get_expr()->get_type() == t_void) {
-            decl.set_type(t_void);
-        }
-        else {
-            utils::error(decl.loc, "functions with no explicit type must have void expressions");
-        }
-    }
+    if (decl.get_type() != decl.get_expr()->get_type())
+        utils::error(decl.loc, "function's expression type different to function's type");
 }
 
 void TypeChecker::visit(FunCall &call) {
