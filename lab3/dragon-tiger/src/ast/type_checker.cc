@@ -32,7 +32,7 @@ void TypeChecker::visit(BinaryOperator &op) {
         utils::error(op.loc, "cannot execute arithmetic operation on a type other than 'int'");
     }
     else {
-        op.set_type(op.get_left().get_type());
+        op.set_type(t_int);
     }
 }
 
@@ -62,6 +62,9 @@ void TypeChecker::visit(IfThenElse &ite) {
     ite.get_condition().accept(*this);
     ite.get_then_part().accept(*this);
     ite.get_else_part().accept(*this);
+    if (ite.get_condition().get_type() != t_int) {
+        utils::error(ite.get_condition().loc, "'int' type expression expected at if condition");
+    }
     if (ite.get_then_part().get_type() ==  ite.get_else_part().get_type()) {
         ite.set_type(ite.get_then_part().get_type());
     }
