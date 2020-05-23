@@ -2,7 +2,6 @@
 #define TYPE_CHECKER_HH
 
 #include "nodes.hh"
-#define debug(X) std::cout<<X<<std::endl
 
 namespace ast {
 namespace type_checker {
