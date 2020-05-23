@@ -102,12 +102,17 @@ void TypeChecker::visit(FunDecl &decl) {
         param->accept(*this);
 
     // Primitive functions
-    if (!decl.get_expr() && decl.type_name) {
-        if ((decl.type_name == Symbol("int"))) {
-            decl.set_type(t_int);
+    if (!decl.get_expr()) {
+        if (decl.type_name) {
+            if ((decl.type_name == Symbol("int"))) {
+                decl.set_type(t_int);
+            }
+            else if ((decl.type_name == Symbol("string"))) {
+                decl.set_type(t_string);
+            }
         }
-        else if ((decl.type_name == Symbol("string"))) {
-            decl.set_type(t_string);
+        else {
+            decl.set_type(t_void);
         }
         return;
     }
