@@ -97,6 +97,25 @@ void TypeChecker::visit(FunDecl &decl) {
     for (auto param : decl.get_params())
         param->accept(*this);
     decl.get_expr()->accept(*this);
+    if (decl.type_name) {
+        if ((decl.type_name == Symbol("int")) && decl.get_expr()->get_type() == t_int) {
+            decl.set_type(t_int);
+        }
+        else if ((decl.type_name == Symbol("string")) && (decl.get_expr()->get_type() == t_string)) {
+            decl.set_type(t_string);
+        }
+        else {
+            utils::error(decl.loc, "function's expression type different to function's type");
+        }
+    }
+    else {
+        if (decl.get_expr()->get_type() == t_void) {
+            decl.set_type(t_void);
+        }
+        else {
+            utils::error(decl.loc, "functions with no explicit type must have void expressions");
+        }
+    }
 }
 
 void TypeChecker::visit(FunCall &call) {
