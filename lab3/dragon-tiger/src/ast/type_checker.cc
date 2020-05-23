@@ -31,6 +31,12 @@ void TypeChecker::visit(BinaryOperator &op) {
     ) {
         utils::error(op.loc, "cannot execute arithmetic operation on a type other than 'int'");
     }
+    else if (
+        ((op.op == o_gt) || (op.op == o_ge) || (op.op == o_lt) || (op.op == o_le))
+        && ((op.get_left().get_type() == t_void) || (op.get_right().get_type() == t_void))
+    ) {
+        utils::error(op.loc, "cannot compare order of void expression");
+    }
     else {
         op.set_type(t_int);
     }
@@ -151,7 +157,7 @@ void TypeChecker::visit(FunCall &call) {
     }
     for (auto arg : call.get_args())
         arg->accept(*this);
-    for (int i = 0; i < decl.get_params().size(); i++) {
+    for (unsigned i = 0; i < decl.get_params().size(); i++) {
         if (call.get_args().at(i)->get_type() != decl.get_params().at(i)->get_type()) {
             VarDecl *param = decl.get_params().at(i);
             Expr *arg = call.get_args().at(i);
