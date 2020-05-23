@@ -94,9 +94,26 @@ void TypeChecker::visit(VarDecl &decl) {
 }
 
 void TypeChecker::visit(FunDecl &decl) {
+    // In case the function has already been analysed
+    if (decl.get_type() != t_undef)
+        return;
+
     for (auto param : decl.get_params())
         param->accept(*this);
+
+    // Primitive functions
+    if (!decl.get_expr() && decl.type_name) {
+        if ((decl.type_name == Symbol("int"))) {
+            decl.set_type(t_int);
+        }
+        else if ((decl.type_name == Symbol("string"))) {
+            decl.set_type(t_string);
+        }
+        return;
+    }
+
     decl.get_expr()->accept(*this);
+
     if (decl.type_name) {
         if ((decl.type_name == Symbol("int")) && decl.get_expr()->get_type() == t_int) {
             decl.set_type(t_int);
@@ -120,6 +137,9 @@ void TypeChecker::visit(FunDecl &decl) {
 
 void TypeChecker::visit(FunCall &call) {
     FunDecl &decl = call.get_decl().get();
+
+    if (decl.get_type() == t_undef)
+        decl.accept(*this);
 
     if (call.get_args().size() != decl.get_params().size()) {
         utils::error(call.loc, "function call lacking parameters");
