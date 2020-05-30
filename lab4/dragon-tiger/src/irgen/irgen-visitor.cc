@@ -80,6 +80,7 @@ llvm::Value *IRGenerator::visit(const Sequence &seq) {
     result = expr->accept(*this);
   // An empty sequence should return () but the result
   // will never be used anyway, so nullptr is fine.
+
   return result;
 }
 
@@ -99,7 +100,11 @@ llvm::Value *IRGenerator::visit(const IfThenElse &ite) {
 }
 
 llvm::Value *IRGenerator::visit(const VarDecl &decl) {
-  UNIMPLEMENTED();
+  llvm::Value *variable = alloca_in_entry(llvm_type(decl.get_type()), decl.name);
+  llvm::Value *value = decl.get_expr()->accept(*this);
+  Builder.CreateStore(value, variable);
+  allocations[&decl] = variable;
+  return variable;
 }
 
 llvm::Value *IRGenerator::visit(const FunDecl &decl) {
