@@ -92,7 +92,8 @@ llvm::Value *IRGenerator::visit(const Let &let) {
 }
 
 llvm::Value *IRGenerator::visit(const Identifier &id) {
-  UNIMPLEMENTED();
+  llvm::Value *reg = Builder.CreateLoad(address_of(id));
+  return reg;
 }
 
 llvm::Value *IRGenerator::visit(const IfThenElse &ite) {
