@@ -25,7 +25,8 @@ llvm::Value *IRGenerator::visit(const StringLiteral &literal) {
 }
 
 llvm::Value *IRGenerator::visit(const Break &b) {
-  UNIMPLEMENTED();
+  Builder.CreateBr(loop_exit_bbs[&b.get_loop().get()]);
+  return nullptr;
 }
 
 llvm::Value *IRGenerator::visit(const BinaryOperator &op) {
@@ -192,22 +193,24 @@ llvm::Value *IRGenerator::visit(const FunCall &call) {
 }
 
 llvm::Value *IRGenerator::visit(const WhileLoop &loop) {
-  llvm::BasicBlock *const loop_test =
+  llvm::BasicBlock *const test_block =
     llvm::BasicBlock::Create(Context, "loop_test", current_function);
-  llvm::BasicBlock *const loop_body =
+  llvm::BasicBlock *const body_block =
     llvm::BasicBlock::Create(Context, "loop_body", current_function);
-  llvm::BasicBlock *const loop_end =
+  llvm::BasicBlock *const end_block =
     llvm::BasicBlock::Create(Context, "loop_end", current_function);
 
-  Builder.SetInsertPoint(loop_test);
+  loop_exit_bbs[&loop] = end_block;
+
+  Builder.SetInsertPoint(test_block);
   Builder.CreateCondBr(Builder.CreateICmpNE(loop.get_condition().accept(*this), Builder.getInt32(0)),
-  loop_body, loop_end);
+  body_block, end_block);
 
-  Builder.SetInsertPoint(loop_body);
+  Builder.SetInsertPoint(body_block);
   loop.get_body().accept(*this);
-  Builder.CreateBr(loop_test);
+  Builder.CreateBr(test_block);
 
-  Builder.SetInsertPoint(loop_end);
+  Builder.SetInsertPoint(end_block);
   return nullptr;
 }
 
@@ -220,6 +223,9 @@ llvm::Value *IRGenerator::visit(const ForLoop &loop) {
       llvm::BasicBlock::Create(Context, "loop_end", current_function);
   llvm::Value *const index = loop.get_variable().accept(*this);
   llvm::Value *const high = loop.get_high().accept(*this);
+
+  loop_exit_bbs[&loop] = end_block;
+
   Builder.CreateBr(test_block);
 
   Builder.SetInsertPoint(test_block);
