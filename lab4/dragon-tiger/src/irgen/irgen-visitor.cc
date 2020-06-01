@@ -192,7 +192,23 @@ llvm::Value *IRGenerator::visit(const FunCall &call) {
 }
 
 llvm::Value *IRGenerator::visit(const WhileLoop &loop) {
-  UNIMPLEMENTED();
+  llvm::BasicBlock *const loop_test =
+    llvm::BasicBlock::Create(Context, "loop_test", current_function);
+  llvm::BasicBlock *const loop_body =
+    llvm::BasicBlock::Create(Context, "loop_body", current_function);
+  llvm::BasicBlock *const loop_end =
+    llvm::BasicBlock::Create(Context, "loop_end", current_function);
+
+  Builder.SetInsertPoint(loop_test);
+  Builder.CreateCondBr(Builder.CreateICmpNE(loop.get_condition().accept(*this), Builder.getInt32(0)),
+  loop_body, loop_end);
+
+  Builder.SetInsertPoint(loop_body);
+  loop.get_body().accept(*this);
+  Builder.CreateBr(loop_test);
+
+  Builder.SetInsertPoint(loop_end);
+  return nullptr;
 }
 
 llvm::Value *IRGenerator::visit(const ForLoop &loop) {
