@@ -93,8 +93,13 @@ llvm::Value *IRGenerator::visit(const Let &let) {
 }
 
 llvm::Value *IRGenerator::visit(const Identifier &id) {
-  llvm::Value *reg = Builder.CreateLoad(address_of(id));
-  return reg;
+  if (id.get_type() != t_void) {
+    llvm::Value *reg = Builder.CreateLoad(address_of(id));
+    return reg;
+  }
+  else {
+    return nullptr;
+  }
 }
 
 llvm::Value *IRGenerator::visit(const IfThenElse &ite) {
