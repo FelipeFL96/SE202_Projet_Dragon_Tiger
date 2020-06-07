@@ -205,6 +205,8 @@ llvm::Value *IRGenerator::visit(const WhileLoop &loop) {
 
   loop_exit_bbs[&loop] = end_block;
 
+  Builder.CreateBr(test_block);
+
   Builder.SetInsertPoint(test_block);
   Builder.CreateCondBr(Builder.CreateICmpNE(loop.get_condition().accept(*this), Builder.getInt32(0)),
   body_block, end_block);
