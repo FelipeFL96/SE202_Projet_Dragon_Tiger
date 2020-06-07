@@ -25,7 +25,12 @@ llvm::Value *IRGenerator::visit(const StringLiteral &literal) {
 }
 
 llvm::Value *IRGenerator::visit(const Break &b) {
+  llvm::BasicBlock *after_break =
+    llvm::BasicBlock::Create(Context, "break_deprecated", current_function);
+
   Builder.CreateBr(loop_exit_bbs[&b.get_loop().get()]);
+
+  Builder.SetInsertPoint(after_break);
   return nullptr;
 }
 
