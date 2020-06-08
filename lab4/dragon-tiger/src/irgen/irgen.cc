@@ -73,6 +73,7 @@ void IRGenerator::generate_function(const FunDecl &decl) {
   llvm::BasicBlock *bb1 =
       llvm::BasicBlock::Create(Context, "entry", current_function);
 
+
   // Create a second basic block for body insertion
   llvm::BasicBlock *bb2 =
       llvm::BasicBlock::Create(Context, "body", current_function);
@@ -93,6 +94,9 @@ void IRGenerator::generate_function(const FunDecl &decl) {
   // Visit the body
   llvm::Value *expr = decl.get_expr()->accept(*this);
 
+  // Generate a frame structure to the function
+  generate_frame();
+
   // Finish off the function.
   if (decl.get_type() == t_void)
     Builder.CreateRetVoid();
@@ -105,6 +109,25 @@ void IRGenerator::generate_function(const FunDecl &decl) {
 
   // Validate the generated code, checking for consistency.
   llvm::verifyFunction(*current_function);
+}
+
+void IRGenerator::generate_frame() {
+  std::vector<llvm::Type*> frame_types;
+
+  if (current_function_decl->get_parent()) {
+    llvm::StructType *parent_frame = frame_type[&current_function_decl->get_parent().get()];
+    frame_types.push_back(parent_frame);
+  }
+
+  for (auto allocation : allocations) {
+    frame_types.push_back(llvm_type(allocation.first->get_type())->getPointerTo());
+  }
+
+  llvm::StructType *types =
+    llvm::StructType::create(frame_types, "ft_" + current_function_decl->get_external_name().get());
+
+  frame_type[current_function_decl] = types;
+  frame = alloca_in_entry(types, "frame");
 }
 
 } // namespace irgen

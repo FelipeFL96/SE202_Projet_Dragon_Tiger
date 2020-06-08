@@ -73,6 +73,8 @@ class IRGenerator : public ConstASTValueVisitor {
   // Return the address of a given identifier.
   llvm::Value *address_of(const Identifier &id);
 
+  void generate_frame();
+
 public:
   // Constructor
   IRGenerator();
