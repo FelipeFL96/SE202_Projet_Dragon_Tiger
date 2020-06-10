@@ -769,7 +769,7 @@ public:
   }
 };
 
-} // inline namespace types
+} // namespace types
 
 } // namespace ast
 

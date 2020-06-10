@@ -15,11 +15,11 @@ void __print_err(const char *s) {
 }
 
 void __print(const char *s) {
-  error("UNIMPLEMENTED __print");
+  printf("%s\n", s);
 }
 
 void __print_int(const int32_t i) {
-  error("UNIMPLEMENTED __print_int");
+  printf("%d\n", i);
 }
 
 void __flush(void) {
@@ -35,7 +35,9 @@ int32_t __ord(const char *s) {
 }
 
 const char *__chr(int32_t i) {
-  error("UNIMPLEMENTED __chr");
+  if (i < 0 || i > 255)
+    error("chr: character out of range");
+  return (char) i;
 }
 
 int32_t __size(const char *s) {

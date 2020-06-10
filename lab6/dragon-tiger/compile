@@ -6,8 +6,8 @@
 
 AS="gcc"
 CC="gcc"
-LLC="/usr/lib/llvm-3.9/bin//llc"
-OPT="/usr/lib/llvm-3.9/bin//opt"
+LLC="/usr/lib/llvm-9/bin//llc"
+OPT="/usr/lib/llvm-9/bin//opt"
 
 tmp=$(mktemp)
 
