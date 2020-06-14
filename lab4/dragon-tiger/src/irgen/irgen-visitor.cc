@@ -17,15 +17,15 @@ namespace {
 namespace irgen {
 
 llvm::Value *IRGenerator::visit(const IntegerLiteral &literal) {
-  return Builder.getInt32(literal.value);
+  debug("INTEGER");return Builder.getInt32(literal.value);
 }
 
 llvm::Value *IRGenerator::visit(const StringLiteral &literal) {
-  return Builder.CreateGlobalStringPtr(literal.value.get());
+  debug("STRING");return Builder.CreateGlobalStringPtr(literal.value.get());
 }
 
 llvm::Value *IRGenerator::visit(const Break &b) {
-  llvm::BasicBlock *after_break =
+  debug("BREAK");llvm::BasicBlock *after_break =
     llvm::BasicBlock::Create(Context, "break_deprecated", current_function);
 
   Builder.CreateBr(loop_exit_bbs[&b.get_loop().get()]);
@@ -37,7 +37,7 @@ llvm::Value *IRGenerator::visit(const Break &b) {
 llvm::Value *IRGenerator::visit(const BinaryOperator &op) {
   // Void values can be compared for equality only. We directly
   // return 1 or 0 depending on the equality/inequality operator.
-  if (op.get_left().get_type() == t_void) {
+  debug("BINOP");if (op.get_left().get_type() == t_void) {
     return Builder.getInt32(op.op == o_eq);
   }
 
@@ -81,7 +81,7 @@ llvm::Value *IRGenerator::visit(const BinaryOperator &op) {
 }
 
 llvm::Value *IRGenerator::visit(const Sequence &seq) {
-  llvm::Value *result = nullptr;
+  debug("SEQUENCE");llvm::Value *result = nullptr;
   for (auto expr : seq.get_exprs())
     result = expr->accept(*this);
   // An empty sequence should return () but the result
@@ -91,19 +91,19 @@ llvm::Value *IRGenerator::visit(const Sequence &seq) {
 }
 
 llvm::Value *IRGenerator::visit(const Let &let) {
-  for (auto decl : let.get_decls())
+  debug("LET");for (auto decl : let.get_decls())
     decl->accept(*this);
 
   return let.get_sequence().accept(*this);
 }
 
 llvm::Value *IRGenerator::visit(const Identifier &id) {
-  llvm::Value *reg = Builder.CreateLoad(address_of(id));
+  debug("IDENTIFIER");llvm::Value *reg = Builder.CreateLoad(address_of(id));
   return reg;
 }
 
 llvm::Value *IRGenerator::visit(const IfThenElse &ite) {
-  llvm::BasicBlock *const if_then =
+  debug("IF");llvm::BasicBlock *const if_then =
       llvm::BasicBlock::Create(Context, "if_then", current_function);
   llvm::BasicBlock *const if_else =
       llvm::BasicBlock::Create(Context, "if_else", current_function);
@@ -141,10 +141,10 @@ llvm::Value *IRGenerator::visit(const IfThenElse &ite) {
 }
 
 llvm::Value *IRGenerator::visit(const VarDecl &decl) {
-  if (decl.get_type() == t_void)
+  debug("VARDECL");if (decl.get_type() == t_void)
     return nullptr;
 
-  llvm::Value *variable = alloca_in_entry(llvm_type(decl.get_type()), decl.name);
+  llvm::Value *variable = generate_vardecl(decl);
   if (decl.get_expr()) {
     llvm::Value *value = decl.get_expr()->accept(*this);
     Builder.CreateStore(value, variable);
@@ -154,7 +154,7 @@ llvm::Value *IRGenerator::visit(const VarDecl &decl) {
 }
 
 llvm::Value *IRGenerator::visit(const FunDecl &decl) {
-  std::vector<llvm::Type *> param_types;
+  debug("FUNDECL: " << decl.name);std::vector<llvm::Type *> param_types;
 
   for (auto param_decl : decl.get_params()) {
     param_types.push_back(llvm_type(param_decl->get_type()));
@@ -178,7 +178,7 @@ llvm::Value *IRGenerator::visit(const FunDecl &decl) {
 
 llvm::Value *IRGenerator::visit(const FunCall &call) {
   // Look up the name in the global module table.
-  const FunDecl &decl = call.get_decl().get();
+  debug("CALL");const FunDecl &decl = call.get_decl().get();
   llvm::Function *callee =
       Mod->getFunction(decl.get_external_name().get());
 
@@ -203,7 +203,7 @@ llvm::Value *IRGenerator::visit(const FunCall &call) {
 }
 
 llvm::Value *IRGenerator::visit(const WhileLoop &loop) {
-  llvm::BasicBlock *const test_block =
+  debug("WHILE");llvm::BasicBlock *const test_block =
     llvm::BasicBlock::Create(Context, "loop_test", current_function);
   llvm::BasicBlock *const body_block =
     llvm::BasicBlock::Create(Context, "loop_body", current_function);
@@ -227,7 +227,7 @@ llvm::Value *IRGenerator::visit(const WhileLoop &loop) {
 }
 
 llvm::Value *IRGenerator::visit(const ForLoop &loop) {
-  llvm::BasicBlock *const test_block =
+  debug("FOR");llvm::BasicBlock *const test_block =
       llvm::BasicBlock::Create(Context, "loop_test", current_function);
   llvm::BasicBlock *const body_block =
       llvm::BasicBlock::Create(Context, "loop_body", current_function);
@@ -255,7 +255,7 @@ llvm::Value *IRGenerator::visit(const ForLoop &loop) {
 }
 
 llvm::Value *IRGenerator::visit(const Assign &assign) {
-  llvm::Value *value = assign.get_rhs().accept(*this);
+  debug("ASSIGNMENT");llvm::Value *value = assign.get_rhs().accept(*this);
   Builder.CreateStore(value, address_of(assign.get_lhs()));
   return nullptr;
 }

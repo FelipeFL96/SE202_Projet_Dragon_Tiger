@@ -9,6 +9,7 @@
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
+/**/#define debug(X) std::cout<<X<<std::endl
 
 namespace irgen {
 using namespace ast::types;
@@ -73,7 +74,17 @@ class IRGenerator : public ConstASTValueVisitor {
   // Return the address of a given identifier.
   llvm::Value *address_of(const Identifier &id);
 
+  // Generates the frame information required to each function
+  // analyzed from the ast.
   void generate_frame();
+
+  // Returns either the current function's frame information or
+  // the information of one or several levels above. The returned
+  // pair contains the frame type and an expression to be able to
+  // access it.
+  std::pair<llvm::StructType *, llvm::Value *> frame_up(int levels);
+
+  llvm::Value * generate_vardecl(const VarDecl &decl);
 
 public:
   // Constructor

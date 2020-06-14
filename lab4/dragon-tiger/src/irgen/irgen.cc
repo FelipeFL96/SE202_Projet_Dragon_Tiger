@@ -68,11 +68,14 @@ void IRGenerator::generate_function(const FunDecl &decl) {
   current_function = Mod->getFunction(decl.get_external_name().get());
   current_function_decl = &decl;
   std::vector<VarDecl *> params = decl.get_params();
+  debug("CURRENT FUNCTION: " << current_function_decl->get_external_name().get());
 
   // Create a new basic block to insert allocation insertion
   llvm::BasicBlock *bb1 =
       llvm::BasicBlock::Create(Context, "entry", current_function);
 
+  // Generate a frame structure to the function
+  generate_frame();
 
   // Create a second basic block for body insertion
   llvm::BasicBlock *bb2 =
@@ -93,9 +96,6 @@ void IRGenerator::generate_function(const FunDecl &decl) {
 
   // Visit the body
   llvm::Value *expr = decl.get_expr()->accept(*this);
-
-  // Generate a frame structure to the function
-  generate_frame();
 
   // Finish off the function.
   if (decl.get_type() == t_void)
@@ -119,15 +119,55 @@ void IRGenerator::generate_frame() {
     frame_types.push_back(parent_frame);
   }
 
-  for (auto allocation : allocations) {
-    frame_types.push_back(llvm_type(allocation.first->get_type())->getPointerTo());
+  for (auto esc : current_function_decl->get_escaping_decls()) {
+    frame_types.push_back(llvm_type(esc->get_type())->getPointerTo());
   }
 
-  llvm::StructType *types =
+  llvm::StructType *frame_structure =
     llvm::StructType::create(frame_types, "ft_" + current_function_decl->get_external_name().get());
 
-  frame_type[current_function_decl] = types;
-  frame = alloca_in_entry(types, "frame");
+  frame_type[current_function_decl] = frame_structure;
+  frame = alloca_in_entry(frame_structure, "frame");
 }
+
+std::pair<llvm::StructType *, llvm::Value *> IRGenerator::frame_up(int levels) {
+  FunDecl const* fun = current_function_decl;
+  llvm::Value *sl = frame;
+
+  for (int i = 0; i < levels; i++) {
+    fun = &fun->get_parent().get();
+    sl = Builder.CreateLoad(Builder.CreateStructGEP(frame, 0));
+  }
+  std::pair<llvm::StructType *, llvm::Value *> frame_info(frame_type[fun], sl);
+  return frame_info;
+}
+
+llvm::Value *IRGenerator::generate_vardecl(const VarDecl &decl) {
+  if (decl.get_escapes()) {
+    int pos = 0;
+
+    if (current_function_decl->get_parent()) {
+      pos++;
+    }
+    for (auto esc : current_function_decl->get_escaping_decls()) {
+      if (esc == &decl)
+        break;
+      if (esc->get_type() == t_void)
+        continue;
+      pos++;
+    }
+    frame_position[&decl] = pos;
+
+    llvm::Value *decl_address = Builder.CreateStructGEP(frame, pos);
+    allocations[&decl] = decl_address;
+    return decl_address;
+  }
+  else {
+    return alloca_in_entry(llvm_type(decl.get_type()), decl.name);
+  }
+}
+
+
+
 
 } // namespace irgen
