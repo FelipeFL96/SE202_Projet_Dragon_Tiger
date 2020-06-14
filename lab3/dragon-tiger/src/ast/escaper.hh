@@ -2,7 +2,7 @@
 #define AST_ESCAPER_HH
 
 #include "nodes.hh"
-#define debug(X) std::cout<<X<<std::endl;
+
 namespace ast {
 namespace escaper {
 
