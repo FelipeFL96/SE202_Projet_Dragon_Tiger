@@ -44,7 +44,7 @@ void Escaper::visit(IfThenElse &ite) {
 
 void Escaper::visit(VarDecl &decl) {
     if (decl.get_escapes()) {
-        functions.back()->get_escaping_decls().push_back(&decl);
+        current_function->get_escaping_decls().push_back(&decl);
     }
     if (decl.get_expr()) {
         decl.get_expr()->accept(*this);
@@ -52,12 +52,11 @@ void Escaper::visit(VarDecl &decl) {
 }
 
 void Escaper::visit(FunDecl &decl) {
-    functions.push_back(&decl);
+    current_function =  &decl;
     for (auto param : decl.get_params()) {
         param->accept(*this);
     }
     decl.get_expr()->accept(*this);
-    functions.pop_back();
 }
 
 void Escaper::visit(FunCall &call) {

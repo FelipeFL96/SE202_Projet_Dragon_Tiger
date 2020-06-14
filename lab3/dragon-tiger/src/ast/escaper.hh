@@ -2,13 +2,13 @@
 #define AST_ESCAPER_HH
 
 #include "nodes.hh"
-
+#define debug(X) std::cout<<X<<std::endl;
 namespace ast {
 namespace escaper {
 
 class Escaper : public ASTVisitor {
 
-  std::vector<FunDecl *> functions;
+  FunDecl *current_function;
 
 public:
   Escaper();

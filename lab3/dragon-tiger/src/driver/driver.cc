@@ -4,6 +4,7 @@
 #include "../ast/ast_dumper.hh"
 #include "../ast/binder.hh"
 #include "../ast/type_checker.hh"
+#include "../ast/escaper.hh"
 #include "../parser/parser_driver.hh"
 #include "../utils/errors.hh"
 
@@ -51,7 +52,9 @@ int main(int argc, char **argv) {
   FunDecl *main = nullptr;
   if (vm.count("bind") || vm.count("type")) {
     ast::binder::Binder binder;
+    ast::escaper::Escaper escaper;
     main = binder.analyze_program(*parser_driver.result_ast);
+    escaper.escape_decls(main);
   }
 
   if (vm.count("type")) {
