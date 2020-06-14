@@ -92,9 +92,11 @@ void IRGenerator::generate_function(const FunDecl &decl) {
   // after storing it in an alloca.
   unsigned i = 0;
   for (auto &arg : current_function->args()) {
+    if (!decl.is_external) {
+      Builder.CreateStore(&arg, Builder.CreateStructGEP(frame, 0));
+    }
     arg.setName(params[i]->name.get());
-    llvm::Value *const shadow = alloca_in_entry(llvm_type(params[i]->get_type()), params[i]->name.get());
-    allocations[params[i]] = shadow;
+    llvm::Value *const shadow = generate_vardecl(*params[i]);
     Builder.CreateStore(&arg, shadow);
     i++;
   }
