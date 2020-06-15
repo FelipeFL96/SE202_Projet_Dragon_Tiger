@@ -98,7 +98,11 @@ llvm::Value *IRGenerator::visit(const Let &let) {
 }
 
 llvm::Value *IRGenerator::visit(const Identifier &id) {
-  debug("IDENTIFIER");llvm::Value *reg = Builder.CreateLoad(address_of(id));
+  debug("IDENTIFIER");
+  llvm::Value *addr = address_of(id);
+  debug("TEST : " << addr);
+  llvm::Value *reg = Builder.CreateLoad(addr);
+  debug("ALFO");
   return reg;
 }
 

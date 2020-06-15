@@ -92,12 +92,14 @@ void IRGenerator::generate_function(const FunDecl &decl) {
   // after storing it in an alloca.
   unsigned i = 0;
   for (auto &arg : current_function->args()) {
-    if (!decl.is_external) {
+    if (i == 0 && !decl.is_external) {
       Builder.CreateStore(&arg, Builder.CreateStructGEP(frame, 0));
     }
-    arg.setName(params[i]->name.get());
-    llvm::Value *const shadow = generate_vardecl(*params[i]);
-    Builder.CreateStore(&arg, shadow);
+    else {
+      arg.setName(params[i]->name.get());
+      llvm::Value *const shadow = generate_vardecl(*params[i]);
+      Builder.CreateStore(&arg, shadow);
+    }
     i++;
   }
 
@@ -122,7 +124,7 @@ void IRGenerator::generate_frame() {
   std::vector<llvm::Type*> frame_types;
 
   if (current_function_decl->get_parent()) {
-    llvm::StructType *parent_frame = frame_type[&current_function_decl->get_parent().get()];
+    llvm::PointerType *parent_frame = frame_type[&current_function_decl->get_parent().get()]->getPointerTo();
     frame_types.push_back(parent_frame);
   }
 
@@ -140,7 +142,7 @@ void IRGenerator::generate_frame() {
 std::pair<llvm::StructType *, llvm::Value *> IRGenerator::frame_up(int levels) {
   FunDecl const* fun = current_function_decl;
   llvm::Value *sl = frame;
-
+debug("TESTE 1 nv: " << levels);
   for (int i = 0; i < levels; i++) {
     fun = &fun->get_parent().get();
     sl = Builder.CreateLoad(Builder.CreateStructGEP(frame, 0));
