@@ -51,7 +51,9 @@ llvm::Value *IRGenerator::address_of(const Identifier &id) {
     return allocations[&decl];
   }
   else {
-    return frame_up(id.get_depth() - decl.get_depth()).second;
+    llvm::Value *frame_address = frame_up(id.get_depth() - decl.get_depth()).second;
+    llvm::Value *decl_address = Builder.CreateStructGEP(frame_address, frame_position[&id.get_decl().get()]);
+    return decl_address;
   }
 }
 
@@ -92,6 +94,7 @@ void IRGenerator::generate_function(const FunDecl &decl) {
   unsigned i = 0;
   for (auto &arg : current_function->args()) {
     if (!decl.is_external && &arg == current_function->args().begin()) {
+      arg.setName("sl");
       Builder.CreateStore(&arg, Builder.CreateStructGEP(frame, 0));
       continue;
     }
@@ -127,14 +130,11 @@ void IRGenerator::generate_frame() {
   }
 
   for (auto esc : current_function_decl->get_escaping_decls()) {
-    escaping_types.push_back(llvm_type(esc->get_type())->getPointerTo());
-  }
-  if (escaping_types.empty()) {
-    escaping_types.push_back(llvm_type(t_int)->getPointerTo());
+    escaping_types.push_back(llvm_type(esc->get_type()));
   }
 
   llvm::StructType *frame_structure =
-    llvm::StructType::create(escaping_types, "ft_" + current_function_decl->get_external_name().get());
+    llvm::StructType::create(Context, escaping_types, "ft_" + current_function_decl->get_external_name().get());
 
   frame_type[current_function_decl] = frame_structure;
   frame = alloca_in_entry(frame_structure, "frame");
@@ -146,7 +146,7 @@ std::pair<llvm::StructType *, llvm::Value *> IRGenerator::frame_up(int levels) {
 
   for (int i = 0; i < levels; i++) {
     fun = &fun->get_parent().get();
-    sl = Builder.CreateLoad(Builder.CreateStructGEP(frame, 0));
+    sl = Builder.CreateLoad(Builder.CreateStructGEP(sl, 0));
   }
 
   std::pair<llvm::StructType *, llvm::Value *> frame_info(frame_type[fun], sl);
