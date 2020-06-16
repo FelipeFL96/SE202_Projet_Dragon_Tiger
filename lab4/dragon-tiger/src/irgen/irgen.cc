@@ -47,11 +47,11 @@ void IRGenerator::print_ir(std::ostream *ostream) {
 llvm::Value *IRGenerator::address_of(const Identifier &id) {
   assert(id.get_decl());
   const VarDecl &decl = dynamic_cast<const VarDecl &>(id.get_decl().get());
-  if (decl.get_depth() == 0) {
+  if (id.get_depth() == decl.get_depth()) {
     return allocations[&decl];
   }
   else {
-    return frame_up(decl.get_depth()).second;
+    return frame_up(id.get_depth() - decl.get_depth()).second;
   }
 }
 
@@ -73,7 +73,6 @@ void IRGenerator::generate_function(const FunDecl &decl) {
   current_function = Mod->getFunction(decl.get_external_name().get());
   current_function_decl = &decl;
   std::vector<VarDecl *> params = decl.get_params();
-  debug("CURRENT FUNCTION: " << current_function_decl->get_external_name().get());
 
   // Create a new basic block to insert allocation insertion
   llvm::BasicBlock *bb1 =
@@ -92,14 +91,13 @@ void IRGenerator::generate_function(const FunDecl &decl) {
   // after storing it in an alloca.
   unsigned i = 0;
   for (auto &arg : current_function->args()) {
-    if (i == 0 && !decl.is_external) {
+    if (!decl.is_external && &arg == current_function->args().begin()) {
       Builder.CreateStore(&arg, Builder.CreateStructGEP(frame, 0));
+      continue;
     }
-    else {
-      arg.setName(params[i]->name.get());
-      llvm::Value *const shadow = generate_vardecl(*params[i]);
-      Builder.CreateStore(&arg, shadow);
-    }
+    arg.setName(params[i]->name.get());
+    llvm::Value *const shadow = generate_vardecl(*params[i]);
+    Builder.CreateStore(&arg, shadow);
     i++;
   }
 
@@ -121,19 +119,22 @@ void IRGenerator::generate_function(const FunDecl &decl) {
 }
 
 void IRGenerator::generate_frame() {
-  std::vector<llvm::Type*> frame_types;
+  std::vector<llvm::Type*> escaping_types;
 
   if (current_function_decl->get_parent()) {
     llvm::PointerType *parent_frame = frame_type[&current_function_decl->get_parent().get()]->getPointerTo();
-    frame_types.push_back(parent_frame);
+    escaping_types.push_back(parent_frame);
   }
 
   for (auto esc : current_function_decl->get_escaping_decls()) {
-    frame_types.push_back(llvm_type(esc->get_type())->getPointerTo());
+    escaping_types.push_back(llvm_type(esc->get_type())->getPointerTo());
+  }
+  if (escaping_types.empty()) {
+    escaping_types.push_back(llvm_type(t_int)->getPointerTo());
   }
 
   llvm::StructType *frame_structure =
-    llvm::StructType::create(frame_types, "ft_" + current_function_decl->get_external_name().get());
+    llvm::StructType::create(escaping_types, "ft_" + current_function_decl->get_external_name().get());
 
   frame_type[current_function_decl] = frame_structure;
   frame = alloca_in_entry(frame_structure, "frame");
@@ -142,11 +143,12 @@ void IRGenerator::generate_frame() {
 std::pair<llvm::StructType *, llvm::Value *> IRGenerator::frame_up(int levels) {
   FunDecl const* fun = current_function_decl;
   llvm::Value *sl = frame;
-debug("TESTE 1 nv: " << levels);
+
   for (int i = 0; i < levels; i++) {
     fun = &fun->get_parent().get();
     sl = Builder.CreateLoad(Builder.CreateStructGEP(frame, 0));
   }
+
   std::pair<llvm::StructType *, llvm::Value *> frame_info(frame_type[fun], sl);
   return frame_info;
 }
@@ -172,7 +174,9 @@ llvm::Value *IRGenerator::generate_vardecl(const VarDecl &decl) {
     return decl_address;
   }
   else {
-    return alloca_in_entry(llvm_type(decl.get_type()), decl.name);
+    llvm::Value *decl_address = alloca_in_entry(llvm_type(decl.get_type()), decl.name);
+    allocations[&decl] = decl_address;
+    return decl_address;
   }
 }
 
