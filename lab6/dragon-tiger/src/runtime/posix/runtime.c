@@ -11,15 +11,15 @@ static void error(const char *msg) {
 }
 
 void __print_err(const char *s) {
-  fprintf(stderr, "%s\n", s);
+  fprintf(stderr, "%s", s);
 }
 
 void __print(const char *s) {
-  fprintf(stdout, "%s\n", s);
+  fprintf(stdout, "%s", s);
 }
 
 void __print_int(const int32_t i) {
-  fprintf(stdout, "%d\n", i);
+  fprintf(stdout, "%d", i);
 }
 
 void __flush(void) {
