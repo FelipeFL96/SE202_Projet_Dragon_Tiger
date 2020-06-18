@@ -28,20 +28,30 @@ void __flush(void) {
 
 const char *__getchar(void) {
   char* str = (char*) malloc(2*sizeof(char));
-  str[0] = (char) getchar();
+  char c;
+  str[0] = '\0';
   str[1] = '\0';
+  c = (char) getchar();
+  if (c != EOF) {
+    str[0] = c;
+  }
   return str;
 }
 
 int32_t __ord(const char *s) {
-  if (s[0] == '\0')
+  if (s[0] == '\0') {
     return -1;
+  }
+  else if ((int) s[0] < 0) {
+    error("ord: can only convert ASCII characters between 0 and 127");
+  }
   return (int) s[0];
 }
 
 const char *__chr(int32_t i) {
-  if (i < 0 || i > 255)
+  if (i < 0 || i > 255) {
     error("chr: character out of range");
+  }
   char c[2] = {(char) i, '\0'};
   char* s = (char*) malloc(2*sizeof(char));
   strcpy(s, c);
