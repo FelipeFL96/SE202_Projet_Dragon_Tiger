@@ -65,10 +65,12 @@ int32_t __size(const char *s) {
 }
 
 const char *__substring(const char *s, int32_t first, int32_t length) {
-  if (length < 0)
-    error("substring: length must be positive");
-  if (strlen(s) - first < length)
+  if (first < 0 || length < 0) {
+    error("substring: first and length parameters must be positive");
+  }
+  if (strlen(s) < first || strlen(s) - first < length) {
     error("substring: requested substring out of bounds");
+  }
   char* str = (char*) malloc(length*sizeof(char));
   strncpy(str, &s[first], length);
   return str;
@@ -82,7 +84,16 @@ const char *__concat(const char *s1, const char *s2) {
 }
 
 int32_t __strcmp(const char *s1, const char *s2) {
-  return strcmp(s1, s2);
+  int cmp = strcmp(s1, s2);
+  if (cmp < 0) {
+    return -1;
+  }
+  else (cmp > 0) {
+    return 1;
+  }
+  else {
+    return 0;
+  }
 }
 
 int32_t __streq(const char *s1, const char *s2) {
