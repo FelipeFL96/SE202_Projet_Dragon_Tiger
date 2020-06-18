@@ -9,7 +9,6 @@
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
-/**/#define debug(X) std::cout<<X<<std::endl
 
 namespace irgen {
 using namespace ast::types;
