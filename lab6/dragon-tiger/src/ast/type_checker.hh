@@ -7,8 +7,10 @@ namespace ast {
 namespace type_checker {
 
 class TypeChecker : public ASTVisitor {
+
 public:
   TypeChecker();
+  void type_check(FunDecl *main);
   virtual void visit(IntegerLiteral &);
   virtual void visit(StringLiteral &);
   virtual void visit(BinaryOperator &);
@@ -25,7 +27,7 @@ public:
   virtual void visit(Assign &);
 };
 
-} // namespace type_checker
 } // namespace ast
+} // namespace type_checker
 
-#endif // _TYPE_CHECKER_HH
+#endif // TYPE_CHECKER_HH

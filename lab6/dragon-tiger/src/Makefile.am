@@ -1,2 +1,1 @@
-SUBDIRS=utils driver runtime/posix
-EXTRA_DIST=parser
+SUBDIRS=parser ast irgen utils driver runtime/posix

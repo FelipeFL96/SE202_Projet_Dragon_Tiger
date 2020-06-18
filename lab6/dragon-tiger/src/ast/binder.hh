@@ -12,21 +12,21 @@ namespace binder {
 typedef std::unordered_map<Symbol, Decl *> scope_t;
 
 class Binder : public ASTVisitor {
-  int depth;
   std::vector<scope_t> scopes;
   std::vector<FunDecl *> functions;
   std::vector<Loop *> loops;
+  std::vector<VarDecl *> loop_indexes;
   std::unordered_set<Symbol> external_names;
+  bool variable_declaration = false;
   void push_scope();
   void pop_scope();
   scope_t &current_scope();
   void enter(Decl &);
-  void enter_variable(VarDecl &);
   Decl &find(const location loc, const Symbol &name);
-  void resolve(Identifier &);
   void enter_primitive(const std::string &, const boost::optional<Symbol> &,
                        const std::vector<Symbol> &);
   void set_parent_and_external_name(FunDecl &decl);
+  bool is_loop_index(VarDecl*);
 
 public:
   Binder();

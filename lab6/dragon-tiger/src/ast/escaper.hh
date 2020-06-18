@@ -7,10 +7,12 @@ namespace ast {
 namespace escaper {
 
 class Escaper : public ASTVisitor {
+
   FunDecl *current_function;
 
 public:
   Escaper();
+  void escape_decls(FunDecl *main);
   virtual void visit(IntegerLiteral &);
   virtual void visit(StringLiteral &);
   virtual void visit(BinaryOperator &);
@@ -26,6 +28,7 @@ public:
   virtual void visit(Break &);
   virtual void visit(Assign &);
 };
+
 
 } // namespace escaper
 } // namespace ast
