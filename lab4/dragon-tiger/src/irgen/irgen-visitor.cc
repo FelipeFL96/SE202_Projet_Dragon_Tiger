@@ -98,6 +98,8 @@ llvm::Value *IRGenerator::visit(const Let &let) {
 }
 
 llvm::Value *IRGenerator::visit(const Identifier &id) {
+  if (id.get_decl()->get_type() == t_void)
+    return nullptr;
   llvm::Value *reg = Builder.CreateLoad(address_of(id));
   return reg;
 }
@@ -261,8 +263,10 @@ llvm::Value *IRGenerator::visit(const ForLoop &loop) {
 }
 
 llvm::Value *IRGenerator::visit(const Assign &assign) {
-  llvm::Value *value = assign.get_rhs().accept(*this);
-  Builder.CreateStore(value, address_of(assign.get_lhs()));
+  if (assign.get_lhs().get_decl()->get_type() != t_void) {
+    llvm::Value *value = assign.get_rhs().accept(*this);
+    Builder.CreateStore(value, address_of(assign.get_lhs()));
+  }
   return nullptr;
 }
 
