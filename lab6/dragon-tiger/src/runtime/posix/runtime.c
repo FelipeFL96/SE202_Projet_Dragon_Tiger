@@ -42,18 +42,15 @@ int32_t __ord(const char *s) {
   if (s[0] == '\0') {
     return -1;
   }
-  else if ((int) s[0] < 0) {
-    error("ord: can only convert ASCII characters between 0 and 127");
-  }
-  return (int) s[0];
+  return (unsigned) s[0];
 }
 
 const char *__chr(int32_t i) {
-  if (i < 0 || i > 128) {
+  if (i < 0 || i > 255) {
     error("chr: character out of range");
   }
   char c[2] = {(char) i, '\0'};
-  char* s = (char*) malloc(2*sizeof(char));
+  char* s = (char*) malloc(3*sizeof(char));
   strcpy(s, c);
   return s;
 }
