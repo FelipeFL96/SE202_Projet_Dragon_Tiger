@@ -1,5 +1,8 @@
 *~
 Makefile
+Makefile.in
+aclocal.m4
+configure
 autom4te.cache/
 config.h
 config.log
@@ -7,6 +10,7 @@ config.status
 stamp-h1
 src/**/*.o
 src/**/Makefile
+src/**/Makefile.in
 src/**/*.a
 src/**/.deps
 src/**/.clang_complete
