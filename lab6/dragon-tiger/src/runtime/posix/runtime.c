@@ -88,7 +88,7 @@ int32_t __strcmp(const char *s1, const char *s2) {
   if (cmp < 0) {
     return -1;
   }
-  else (cmp > 0) {
+  else if (cmp > 0) {
     return 1;
   }
   else {
@@ -104,8 +104,11 @@ int32_t __not(int32_t i) {
   if (i == 1) {
     return 0;
   }
-  else {
+  else if (i == 0) {
     return 1;
+  }
+  else {
+    error("not: must receive either 0 or 1 as argument");
   }
 }
 
