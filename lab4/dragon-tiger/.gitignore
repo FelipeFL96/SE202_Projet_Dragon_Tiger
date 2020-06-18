@@ -5,6 +5,7 @@ config.h
 config.log
 config.status
 stamp-h1
+test.tig
 src/**/*.o
 src/**/Makefile
 src/**/*.a

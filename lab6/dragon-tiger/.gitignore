@@ -8,6 +8,9 @@ config.h
 config.log
 config.status
 stamp-h1
+a.out
+run
+test.tig
 src/**/*.o
 src/**/Makefile
 src/**/Makefile.in
