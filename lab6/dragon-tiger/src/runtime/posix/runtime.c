@@ -49,7 +49,7 @@ int32_t __ord(const char *s) {
 }
 
 const char *__chr(int32_t i) {
-  if (i < 0 || i > 255) {
+  if (i < 0 || i > 128) {
     error("chr: character out of range");
   }
   char c[2] = {(char) i, '\0'};
@@ -101,14 +101,11 @@ int32_t __streq(const char *s1, const char *s2) {
 }
 
 int32_t __not(int32_t i) {
-  if (i == 1) {
-    return 0;
-  }
-  else if (i == 0) {
+  if (i == 0) {
     return 1;
   }
   else {
-    error("not: must receive either 0 or 1 as argument");
+    return 0;
   }
 }
 
