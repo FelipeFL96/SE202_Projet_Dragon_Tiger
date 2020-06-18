@@ -130,7 +130,8 @@ void IRGenerator::generate_frame() {
   }
 
   for (auto esc : current_function_decl->get_escaping_decls()) {
-    escaping_types.push_back(llvm_type(esc->get_type()));
+    if (esc->get_type() != t_void)
+      escaping_types.push_back(llvm_type(esc->get_type()));
   }
 
   llvm::StructType *frame_structure =
@@ -170,6 +171,7 @@ llvm::Value *IRGenerator::generate_vardecl(const VarDecl &decl) {
     frame_position[&decl] = pos;
 
     llvm::Value *decl_address = Builder.CreateStructGEP(frame, pos);
+
     allocations[&decl] = decl_address;
     return decl_address;
   }
