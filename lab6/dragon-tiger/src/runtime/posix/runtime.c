@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <wchar.h>
+#include <locale.h>
 
 #include "runtime.h"
 
@@ -42,7 +44,11 @@ int32_t __ord(const char *s) {
   if (s[0] == '\0') {
     return -1;
   }
-  return (unsigned) s[0];
+  setlocale(LC_CTYPE, "");
+  wchar_t wc;
+  mbsrtowcs(&wc, &s, 1, NULL);
+  wint_t wi = wc;
+  return (int32_t) wi;
 }
 
 const char *__chr(int32_t i) {
