@@ -55,9 +55,10 @@ const char *__chr(int32_t i) {
   if (i < 0 || i > 255) {
     error("chr: character out of range");
   }
-  char c[2] = {(char) i, '\0'};
-  char* s = (char*) malloc(3*sizeof(char));
-  strcpy(s, c);
+  char *s = (char*) malloc(MB_CUR_MAX*sizeof(char));
+  setlocale(LC_CTYPE, "");
+  wchar_t wc = i;
+  wcrtomb(s, wc, NULL);
   return s;
 }
 
