@@ -11,7 +11,6 @@ class TypeChecker : public ASTVisitor {
 public:
   TypeChecker();
   void type_check(FunDecl *main);
-  FunDecl *analyze_program(Expr &);
   virtual void visit(IntegerLiteral &);
   virtual void visit(StringLiteral &);
   virtual void visit(BinaryOperator &);
@@ -31,4 +30,4 @@ public:
 } // namespace ast
 } // namespace type_checker
 
-#endif //TYPE_CHECKER_HH
+#endif // TYPE_CHECKER_HH

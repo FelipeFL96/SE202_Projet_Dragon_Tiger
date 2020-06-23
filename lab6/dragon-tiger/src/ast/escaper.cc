@@ -80,10 +80,8 @@ void Escaper::visit(Break &b) {
 }
 
 void Escaper::visit(Assign &assign) {
-    
     assign.get_lhs().accept(*this);
     assign.get_rhs().accept(*this);
-    
 }
 
 

@@ -1,5 +1,5 @@
-#ifndef AST_ESCAPER_HH
-#define AST_ESCAPER_HH
+#ifndef ESCAPER_HH
+#define ESCAPER_HH
 
 #include "nodes.hh"
 
@@ -33,4 +33,4 @@ public:
 } // namespace escaper
 } // namespace ast
 
-#endif // AST_ESCAPER_HH
+#endif // ESCAPER_HH
