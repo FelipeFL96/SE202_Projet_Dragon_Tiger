@@ -73,8 +73,8 @@ class IRGenerator : public ConstASTValueVisitor {
   // Return the address of a given identifier.
   llvm::Value *address_of(const Identifier &id);
 
-  // Generates the frame information required to each function
-  // analyzed from the ast.
+  // Generates the frame struct type based n the information
+  // required to each function analyzed from the ast representation.
   void generate_frame();
 
   // Returns either the current function's frame information or
@@ -83,6 +83,9 @@ class IRGenerator : public ConstASTValueVisitor {
   // access it.
   std::pair<llvm::StructType *, llvm::Value *> frame_up(int levels);
 
+  // Returns IR equivalent values to variable declarations through
+  // either allocating them in the entry basic block of a function
+  // or finding their position in the function's frame
   llvm::Value * generate_vardecl(const VarDecl &decl);
 
 public:

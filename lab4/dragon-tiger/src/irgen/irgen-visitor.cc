@@ -4,16 +4,6 @@
 
 #include "llvm/Support/raw_ostream.h"
 
-namespace {
-
-// This function can be removed once the lab has been fully implemented.
-[[noreturn]] void UNIMPLEMENTED() {
-  std::cerr << "Error: unimplemented feature\n";
-  exit(1);
-}
-
-} // namespace
-
 namespace irgen {
 
 llvm::Value *IRGenerator::visit(const IntegerLiteral &literal) {
@@ -25,6 +15,7 @@ llvm::Value *IRGenerator::visit(const StringLiteral &literal) {
 }
 
 llvm::Value *IRGenerator::visit(const Break &b) {
+  // In case there is unreachable code placed just after a break
   llvm::BasicBlock *after_break =
     llvm::BasicBlock::Create(Context, "break_deprecated", current_function);
 
@@ -98,8 +89,9 @@ llvm::Value *IRGenerator::visit(const Let &let) {
 }
 
 llvm::Value *IRGenerator::visit(const Identifier &id) {
-  if (id.get_decl()->get_type() == t_void)
+  if (id.get_decl()->get_type() == t_void) {
     return nullptr;
+  }
   llvm::Value *reg = Builder.CreateLoad(address_of(id));
   return reg;
 }
