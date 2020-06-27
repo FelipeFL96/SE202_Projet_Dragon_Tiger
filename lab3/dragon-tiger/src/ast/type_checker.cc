@@ -27,13 +27,13 @@ void TypeChecker::visit(BinaryOperator &op) {
     }
     else if (
         ((op.op == o_plus) || (op.op == o_minus) || (op.op == o_times) || (op.op == o_divide))
-        && (op.get_left().get_type() == t_string)
+        && (op.get_left().get_type() != t_int)
     ) {
         utils::error(op.loc, "cannot execute arithmetic operation on a type other than 'int'");
     }
     else if (
         ((op.op == o_gt) || (op.op == o_ge) || (op.op == o_lt) || (op.op == o_le))
-        && ((op.get_left().get_type() == t_void) || (op.get_right().get_type() == t_void))
+        && ((op.get_left().get_type() == t_void))
     ) {
         utils::error(op.loc, "cannot compare order of void expression");
     }
